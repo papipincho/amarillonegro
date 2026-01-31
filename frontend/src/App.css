@@ -1,34 +1,98 @@
-.App-logo {
-    height: 40vmin;
-    pointer-events: none;
+/* Brutalist Button Styles */
+.btn-primary {
+  background-color: #FFCC00;
+  color: #000000;
+  border: 2px solid #000000;
+  box-shadow: 4px 4px 0px 0px #000000;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.75rem 1.5rem;
+  transition: all 0.2s ease-out;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-    .App-logo {
-        animation: App-logo-spin infinite 20s linear;
-    }
+.btn-primary:hover {
+  transform: translateY(2px);
+  box-shadow: 2px 2px 0px 0px #000000;
 }
 
-.App-header {
-    background-color: #0f0f10;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: calc(10px + 2vmin);
-    color: white;
+.btn-secondary {
+  background-color: #FFFFFF;
+  color: #000000;
+  border: 2px solid #000000;
+  box-shadow: 4px 4px 0px 0px #000000;
+  font-weight: bold;
+  text-transform: uppercase;
+  padding: 0.75rem 1.5rem;
+  transition: all 0.2s ease-out;
 }
 
-.App-link {
-    color: #61dafb;
+.btn-secondary:hover {
+  background-color: #F4F4F5;
 }
 
-@keyframes App-logo-spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
+/* Brutalist Card */
+.brutalist-card {
+  background-color: #FFFFFF;
+  border: 2px solid #000000;
+  box-shadow: 6px 6px 0px 0px #000000;
+  transition: all 0.3s ease-out;
+}
+
+.brutalist-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 8px 8px 0px 0px #000000;
+}
+
+/* Category Card with Image */
+.category-card {
+  position: relative;
+  overflow: hidden;
+  background-color: #000000;
+  border: 2px solid #000000;
+  box-shadow: 6px 6px 0px 0px #000000;
+  transition: all 0.3s ease-out;
+  cursor: pointer;
+}
+
+.category-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 8px 8px 0px 0px #FFCC00;
+}
+
+.category-card img {
+  transition: transform 0.3s ease-out;
+}
+
+.category-card:hover img {
+  transform: scale(1.05);
+}
+
+/* Input Fields */
+.brutalist-input {
+  border: 2px solid #000000;
+  border-radius: 0;
+  background-color: #F4F4F5;
+  height: 3rem;
+  transition: border-color 0.2s ease-out;
+}
+
+.brutalist-input:focus {
+  outline: none;
+  border-color: #FFCC00;
+  box-shadow: 0 0 0 3px rgba(255, 204, 0, 0.1);
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Oswald', sans-serif;
+  letter-spacing: -0.02em;
+}
+
+body, p, span, div {
+  font-family: 'Inter', sans-serif;
+}
+
+.mono {
+  font-family: 'JetBrains Mono', monospace;
 }
