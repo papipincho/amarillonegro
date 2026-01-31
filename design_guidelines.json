@@ -1,0 +1,158 @@
+{
+  "project_name": "Taxi Barcelona Services",
+  "design_philosophy": {
+    "theme": "Urban Industrial",
+    "emotional_tone": "Reliable, Direct, Professional, Street-Smart",
+    "core_metaphor": "The Asphalt & The Light",
+    "visual_style": "Swiss Brutalist meets Taxi Aesthetics"
+  },
+  "typography": {
+    "headings": {
+      "font_family": "Oswald, sans-serif",
+      "weights": ["500", "700"],
+      "usage": "All section headers, card titles, hero text. Uppercase preferred for top-level headers.",
+      "letter_spacing": "tracking-tight"
+    },
+    "body": {
+      "font_family": "Inter, sans-serif",
+      "weights": ["400", "500"],
+      "usage": "Paragraphs, lists, form inputs",
+      "line_height": "leading-relaxed"
+    },
+    "mono": {
+      "font_family": "JetBrains Mono, monospace",
+      "usage": "Prices, dates, phone numbers, license IDs"
+    }
+  },
+  "colors": {
+    "palette": {
+      "primary": {
+        "name": "Taxi Yellow",
+        "hex": "#FFCC00",
+        "tailwind": "bg-[#FFCC00] text-black"
+      },
+      "secondary": {
+        "name": "Asphalt Black",
+        "hex": "#0A0A0A",
+        "tailwind": "bg-[#0A0A0A] text-white"
+      },
+      "accent": {
+        "name": "Signal White",
+        "hex": "#FFFFFF",
+        "tailwind": "bg-white text-black"
+      },
+      "muted": {
+        "name": "Pavement Grey",
+        "hex": "#F4F4F5",
+        "tailwind": "bg-zinc-100"
+      },
+      "border": {
+        "name": "Hard Border",
+        "hex": "#000000",
+        "tailwind": "border-black"
+      }
+    },
+    "rules": [
+      "Use #FFCC00 for primary CTAs and highlights.",
+      "Use #0A0A0A for footers, heavy headers, and strong text.",
+      "Avoid gradients. Use solid, flat colors.",
+      "High contrast is mandatory. 100% opacity."
+    ]
+  },
+  "layout": {
+    "grid_system": "Bento Grid (High Density)",
+    "container_style": "Sharp edges, 2px solid black borders, brutalist shadows (4px 4px 0px 0px #000000).",
+    "spacing": "Generous padding (p-6, p-8) inside containers to balance the heavy borders.",
+    "border_radius": "rounded-sm (2px) or rounded-none (0px). NO large rounded corners."
+  },
+  "components": {
+    "buttons": {
+      "primary": "bg-[#FFCC00] text-black border-2 border-black shadow-[4px_4px_0px_0px_#000000] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#000000] transition-all font-bold uppercase tracking-wide",
+      "secondary": "bg-white text-black border-2 border-black shadow-[4px_4px_0px_0px_#000000] hover:bg-zinc-50 transition-all font-bold uppercase"
+    },
+    "cards": {
+      "style": "bg-white border-2 border-black shadow-[6px_6px_0px_0px_#000000]",
+      "hover": "hover:translate-y-[-2px] hover:shadow-[8px_8px_0px_0px_#000000] transition-all duration-300"
+    },
+    "inputs": {
+      "style": "border-2 border-black rounded-none focus:ring-0 focus:border-[#FFCC00] bg-zinc-50 h-12"
+    }
+  },
+  "assets": {
+    "image_style": "High contrast, urban, black and white or desaturated with yellow accents (if possible). No soft/dreamy filters.",
+    "categories": {
+      "hero": {
+        "url": "https://images.unsplash.com/photo-1764570400772-e1ed2c8179ae",
+        "alt": "Yellow taxi at night in Barcelona street",
+        "usage": "Homepage Hero Background"
+      },
+      "licencias": {
+        "url": "https://images.unsplash.com/photo-1727413434026-0f8314c037d8",
+        "alt": "Car Key or Document",
+        "note": "Use the car key image if found, otherwise generic key/doc"
+      },
+      "gestorias": {
+        "url": "https://images.unsplash.com/photo-1721379800770-fda153205b1c",
+        "alt": "Paperwork and contracts",
+        "usage": "Card thumbnail"
+      },
+      "talleres": {
+        "url": "https://images.unsplash.com/photo-1764869427883-9d2815278845",
+        "alt": "Mechanic working under car",
+        "usage": "Card thumbnail"
+      },
+      "elementos": {
+        "url": "https://images.unsplash.com/photo-1758411897888-3ca658535fdf",
+        "alt": "Car dashboard technology",
+        "usage": "Card thumbnail"
+      },
+      "escuelas": {
+        "url": "https://images.unsplash.com/photo-1679669602647-aff24d24e414",
+        "alt": "Yellow car for driving school",
+        "usage": "Card thumbnail"
+      },
+      "bolsa_trabajo": {
+        "url": "https://images.unsplash.com/photo-1761579638951-9121bbfcb2a6",
+        "alt": "Taxi driver portrait",
+        "usage": "Card thumbnail"
+      },
+      "emisoras": {
+        "url": "https://images.unsplash.com/photo-1764347923709-fc48487f2486",
+        "alt": "Smartphone navigation map",
+        "usage": "Card thumbnail"
+      },
+      "seguros": {
+        "url": "https://images.unsplash.com/photo-1758518730384-be3d205838e8",
+        "alt": "Business handshake",
+        "usage": "Card thumbnail"
+      }
+    }
+  },
+  "pages": {
+    "home": {
+      "sections": ["Hero", "Category Grid (Bento)", "About/CTA"],
+      "layout": "Vertical scroll, heavy distinct sections"
+    },
+    "category_detail": {
+      "layout": "Grid of cards (1 col mobile, 3 col desktop)",
+      "filter_bar": "Sticky top, yellow background"
+    },
+    "form_page": {
+      "layout": "Centered single column, max-w-2xl",
+      "style": "Paper-like container on asphalt background"
+    }
+  },
+  "universal_guidelines": [
+    "Always use data-testid for interactive elements.",
+    "Responsive design: Mobile first. Stack grids on mobile.",
+    "Accessibility: Ensure text on yellow background is black.",
+    "Motion: Sharp transitions (ease-out-expo), no bounce.",
+    "Do NOT use gradients. Solid colors only."
+  ],
+  "instructions_to_main_agent": "You are building a directory. Focus on the DATA display (cards) and the NAVIGATION. The 'Bento Grid' on the home page is the most important visual element. It should act as a dashboard for the driver. Use the provided image URLs for the category cards. For the Licencias image, if the key image is not available in the JSON, use a generic placeholder or the writing image again.",
+  "tech_stack": {
+    "icons": "lucide-react",
+    "ui_lib": "shadcn/ui (customized)",
+    "styling": "Tailwind CSS"
+  }
+}
