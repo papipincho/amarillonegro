@@ -217,7 +217,7 @@ SAMPLE_SERVICES = [
     },
     {
         "id": "seg-002",
-        "category":="seguros",
+        "category": "seguros",
         "name": "Mutua del Taxi Barcelona",
         "description": "Seguros para taxistas con las mejores coberturas. Especialistas en el sector desde 1980. Tramitación rápida. Consulta sin compromiso.",
         "contact_name": "Asesor de Seguros",
