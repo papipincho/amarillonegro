@@ -131,7 +131,9 @@ def main():
     if tester.failed_tests:
         print("\n❌ Failed Tests:")
         for test in tester.failed_tests:
-            print(f"  - {test['name']}: {test.get('error', f\"Expected {test.get('expected')}, got {test.get('actual')}\")}")
+                expected_msg = f"Expected {test.get('expected')}, got {test.get('actual')}"
+            error_msg = test.get('error', expected_msg)
+            print(f"  - {test['name']}: {error_msg}")
     
     print(f"\n🏷️  Category Results:")
     for category, result in category_results.items():
