@@ -131,7 +131,7 @@ def main():
     if tester.failed_tests:
         print("\n❌ Failed Tests:")
         for test in tester.failed_tests:
-                expected_msg = f"Expected {test.get('expected')}, got {test.get('actual')}"
+            expected_msg = f"Expected {test.get('expected')}, got {test.get('actual')}"
             error_msg = test.get('error', expected_msg)
             print(f"  - {test['name']}: {error_msg}")
     
