@@ -46,7 +46,7 @@ class Service(BaseModel):
     model_config = ConfigDict(extra="ignore")
     
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    category: str  # licencias, gestorias, talleres, elementos, escuelas, bolsa_trabajo, emisoras, seguros
+    category: str
     name: str
     description: str
     contact_name: Optional[str] = None
@@ -89,6 +89,18 @@ class ContactSubmissionCreate(BaseModel):
     business_name: str
     description: str
     website: Optional[str] = None
+
+class NewsletterSubscription(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    email: EmailStr
+    subscribed_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class NewsletterSubscriptionCreate(BaseModel):
+    name: str
+    email: EmailStr
 
 
 # Routes
@@ -202,6 +214,41 @@ async def submit_contact_form(input: ContactSubmissionCreate):
             "email_sent": False,
             "note": "Email not configured"
         }
+
+@api_router.post("/newsletter-subscribe")
+async def subscribe_newsletter(input: NewsletterSubscriptionCreate):
+    # Check if email already exists
+    existing = await db.newsletter_subscriptions.find_one({"email": input.email}, {"_id": 0})
+    if existing:
+        return {
+            "status": "info",
+            "message": "Este email ya está suscrito a nuestras novedades."
+        }
+    
+    # Create subscription object
+    subscription_dict = input.model_dump()
+    subscription_obj = NewsletterSubscription(**subscription_dict)
+    
+    # Save to database
+    doc = subscription_obj.model_dump()
+    doc['subscribed_at'] = doc['subscribed_at'].isoformat()
+    await db.newsletter_subscriptions.insert_one(doc)
+    
+    logger.info(f"New newsletter subscription: {input.email}")
+    
+    return {
+        "status": "success",
+        "message": "¡Gracias por suscribirte! Recibirás las últimas novedades del sector.",
+        "subscription_id": subscription_obj.id
+    }
+
+@api_router.get("/newsletter-subscriptions")
+async def get_newsletter_subscriptions():
+    subscriptions = await db.newsletter_subscriptions.find({}, {"_id": 0}).to_list(1000)
+    for sub in subscriptions:
+        if isinstance(sub.get('subscribed_at'), str):
+            sub['subscribed_at'] = datetime.fromisoformat(sub['subscribed_at'])
+    return subscriptions
 
 
 # Include the router in the main app

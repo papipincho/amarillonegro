@@ -1,10 +1,13 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
-import { Menu } from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { Menu, X } from "lucide-react";
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+
+  const isActive = (path) => location.pathname === path;
 
   return (
     <nav className="bg-[#0A0A0A] border-b-4 border-[#FFCC00] sticky top-0 z-50" data-testid="navbar">
@@ -29,17 +32,37 @@ const Navbar = () => {
           <div className="hidden md:flex items-center gap-6">
             <button
               onClick={() => navigate("/")}
-              className="text-white hover:text-[#FFCC00] font-medium transition-colors"
+              className={`font-medium transition-colors ${
+                isActive("/") ? "text-[#FFCC00]" : "text-white hover:text-[#FFCC00]"
+              }`}
               data-testid="nav-home"
             >
               Inicio
+            </button>
+            <button
+              onClick={() => navigate("/servicios")}
+              className={`font-medium transition-colors ${
+                isActive("/servicios") ? "text-[#FFCC00]" : "text-white hover:text-[#FFCC00]"
+              }`}
+              data-testid="nav-services"
+            >
+              Servicios
+            </button>
+            <button
+              onClick={() => navigate("/noticias")}
+              className={`font-medium transition-colors ${
+                isActive("/noticias") ? "text-[#FFCC00]" : "text-white hover:text-[#FFCC00]"
+              }`}
+              data-testid="nav-news"
+            >
+              Noticias
             </button>
             <button
               onClick={() => navigate("/publicar-servicio")}
               className="bg-[#FFCC00] text-black px-6 py-2 border-2 border-white font-bold uppercase text-sm hover:bg-white transition-colors"
               data-testid="nav-publish"
             >
-              Publicar
+              Publicar Anuncio
             </button>
           </div>
 
@@ -49,7 +72,7 @@ const Navbar = () => {
             className="md:hidden text-[#FFCC00] p-2"
             data-testid="mobile-menu-button"
           >
-            <Menu className="w-6 h-6" />
+            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
 
@@ -62,9 +85,33 @@ const Navbar = () => {
                   navigate("/");
                   setMobileMenuOpen(false);
                 }}
-                className="text-white hover:text-[#FFCC00] font-medium text-left"
+                className={`font-medium text-left ${
+                  isActive("/") ? "text-[#FFCC00]" : "text-white"
+                }`}
               >
                 Inicio
+              </button>
+              <button
+                onClick={() => {
+                  navigate("/servicios");
+                  setMobileMenuOpen(false);
+                }}
+                className={`font-medium text-left ${
+                  isActive("/servicios") ? "text-[#FFCC00]" : "text-white"
+                }`}
+              >
+                Servicios
+              </button>
+              <button
+                onClick={() => {
+                  navigate("/noticias");
+                  setMobileMenuOpen(false);
+                }}
+                className={`font-medium text-left ${
+                  isActive("/noticias") ? "text-[#FFCC00]" : "text-white"
+                }`}
+              >
+                Noticias
               </button>
               <button
                 onClick={() => {
@@ -73,7 +120,7 @@ const Navbar = () => {
                 }}
                 className="bg-[#FFCC00] text-black px-6 py-2 border-2 border-white font-bold uppercase text-sm"
               >
-                Publicar Servicio
+                Publicar Anuncio
               </button>
             </div>
           </div>

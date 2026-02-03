@@ -61,54 +61,26 @@ const CATEGORIES = [
   }
 ];
 
-const Home = () => {
+const ServicesPage = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen">
-      {/* Hero Section */}
-      <section 
-        className="relative h-[70vh] flex items-center justify-center overflow-hidden"
-        style={{
-          backgroundImage: "url('https://images.unsplash.com/photo-1646772488020-0d37a2dbb43b?w=1600&h=900&fit=crop')",
-          backgroundSize: "cover",
-          backgroundPosition: "center"
-        }}
-        data-testid="hero-section"
-      >
-        <div className="absolute inset-0 bg-[#0A0A0A] opacity-70"></div>
-        <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-white mb-6 tracking-tight">
-            PORTAL DE SERVICIOS
+    <div className="min-h-screen bg-zinc-100">
+      {/* Header */}
+      <div className="bg-[#FFCC00] py-16 border-b-4 border-black">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <h1 className="text-5xl sm:text-6xl font-bold text-black mb-4 tracking-tight" data-testid="services-title">
+            SERVICIOS PARA TAXISTAS
           </h1>
-          <div className="inline-block bg-[#FFCC00] px-8 py-3 border-2 border-black shadow-[6px_6px_0px_0px_#000000] mb-8">
-            <h2 className="text-2xl sm:text-3xl font-bold text-black tracking-tight">
-              TAXI BARCELONA
-            </h2>
-          </div>
-          <p className="text-lg sm:text-xl text-zinc-200 mb-8 leading-relaxed max-w-2xl mx-auto">
-            El directorio completo de servicios profesionales para el sector del taxi en Barcelona
+          <p className="text-xl text-black max-w-3xl mx-auto leading-relaxed">
+            Encuentra todos los servicios profesionales que necesitas para tu actividad como taxista en Barcelona
           </p>
-          <button
-            onClick={() => navigate("/publicar-servicio")}
-            className="btn-primary inline-block"
-            data-testid="publish-service-cta"
-          >
-            Publicar mi Servicio
-          </button>
         </div>
-      </section>
+      </div>
 
-      {/* Categories Grid - Bento Style */}
-      <section className="py-16 px-4 bg-zinc-100" data-testid="categories-section">
+      {/* Categories Grid */}
+      <section className="py-16 px-4" data-testid="services-categories">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl sm:text-5xl font-bold text-[#0A0A0A] mb-4 tracking-tight">
-              SERVICIOS DISPONIBLES
-            </h2>
-            <div className="w-24 h-1 bg-[#FFCC00] mx-auto"></div>
-          </div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {CATEGORIES.map((category) => {
               const Icon = category.icon;
@@ -117,7 +89,7 @@ const Home = () => {
                   key={category.id}
                   onClick={() => navigate(`/categoria/${category.id}`)}
                   className="category-card h-64 rounded-sm"
-                  data-testid={`category-card-${category.id}`}
+                  data-testid={`service-category-${category.id}`}
                 >
                   <img 
                     src={`${category.image}?w=500&h=500&fit=crop`}
@@ -137,27 +109,8 @@ const Home = () => {
           </div>
         </div>
       </section>
-
-      {/* CTA Section */}
-      <section className="py-20 bg-[#FFCC00]" data-testid="cta-section">
-        <div className="max-w-4xl mx-auto text-center px-4">
-          <h2 className="text-4xl sm:text-5xl font-bold text-black mb-6 tracking-tight">
-            ¿OFRECES SERVICIOS PARA TAXISTAS?
-          </h2>
-          <p className="text-lg text-black mb-8 leading-relaxed">
-            Publica tu negocio en nuestro portal y llega a cientos de profesionales del taxi en Barcelona
-          </p>
-          <button
-            onClick={() => navigate("/publicar-servicio")}
-            className="btn-secondary"
-            data-testid="footer-cta-button"
-          >
-            Solicitar Información
-          </button>
-        </div>
-      </section>
     </div>
   );
 };
 
-export default Home;
+export default ServicesPage;

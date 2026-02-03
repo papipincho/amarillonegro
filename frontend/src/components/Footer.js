@@ -1,9 +1,91 @@
-import React from "react";
+import React, { useState } from "react";
 import { Mail } from "lucide-react";
+import axios from "axios";
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const API = `${BACKEND_URL}/api`;
 
 const Footer = () => {
+  const [newsletterData, setNewsletterData] = useState({ name: "", email: "" });
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState("");
+
+  const handleNewsletterSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setMessage("");
+
+    try {
+      const response = await axios.post(`${API}/newsletter-subscribe`, newsletterData);
+      setMessageType("success");
+      setMessage(response.data.message);
+      setNewsletterData({ name: "", email: "" });
+    } catch (error) {
+      setMessageType("error");
+      setMessage("Error al suscribirte. Por favor, inténtalo de nuevo.");
+    } finally {
+      setLoading(false);
+      setTimeout(() => setMessage(""), 5000);
+    }
+  };
+
   return (
     <footer className="bg-[#0A0A0A] text-white border-t-4 border-[#FFCC00]" data-testid="footer">
+      {/* Newsletter Section */}
+      <div className="bg-[#FFCC00] py-12 px-4">
+        <div className="max-w-4xl mx-auto">
+          <h3 className="text-3xl font-bold text-black mb-4 text-center tracking-tight">
+            RECIBE LAS NOVEDADES
+          </h3>
+          <p className="text-center text-black mb-6">
+            Suscríbete para estar al día de todas las noticias del sector del taxi en Barcelona
+          </p>
+          
+          <form onSubmit={handleNewsletterSubmit} className="max-w-2xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <input
+                type="text"
+                placeholder="Tu nombre"
+                value={newsletterData.name}
+                onChange={(e) => setNewsletterData({ ...newsletterData, name: e.target.value })}
+                required
+                className="brutalist-input px-4 bg-white"
+                data-testid="newsletter-name"
+              />
+              <input
+                type="email"
+                placeholder="Tu email"
+                value={newsletterData.email}
+                onChange={(e) => setNewsletterData({ ...newsletterData, email: e.target.value })}
+                required
+                className="brutalist-input px-4 bg-white"
+                data-testid="newsletter-email"
+              />
+              <button
+                type="submit"
+                disabled={loading}
+                className="bg-[#0A0A0A] text-[#FFCC00] border-2 border-black font-bold uppercase px-6 py-3 hover:bg-black transition-colors disabled:opacity-50"
+                data-testid="newsletter-submit"
+              >
+                {loading ? "Enviando..." : "Suscribirse"}
+              </button>
+            </div>
+            {message && (
+              <p
+                className={`mt-4 text-center font-medium ${
+                  messageType === "success" ? "text-green-800" : "text-red-800"
+                }`}
+                data-testid="newsletter-message"
+              >
+                {message}
+              </p>
+            )}
+          </form>
+        </div>
+      </div>
+
+      {/* Footer Links */}
       <div className="max-w-7xl mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* About */}
@@ -28,8 +110,18 @@ const Footer = () => {
                 </a>
               </li>
               <li>
+                <a href="/servicios" className="text-zinc-400 hover:text-[#FFCC00] transition-colors">
+                  Servicios
+                </a>
+              </li>
+              <li>
+                <a href="/noticias" className="text-zinc-400 hover:text-[#FFCC00] transition-colors">
+                  Noticias
+                </a>
+              </li>
+              <li>
                 <a href="/publicar-servicio" className="text-zinc-400 hover:text-[#FFCC00] transition-colors">
-                  Publicar Servicio
+                  Publicar Anuncio
                 </a>
               </li>
             </ul>
