@@ -77,7 +77,7 @@ SAMPLE_SERVICES = [
         "phone": "+34 932 345 678",
         "website": "https://www.autotaxi.com",
         "address": "Carrer de Sants, 234, Barcelona",
-        "image_url": "https://images.unsplash.com/photo-1764869427883-9d2815278845?w=600&h=400&fit=crop",
+        "image_url": "https://images.unsplash.com/photo-1737472441624-a7a800e9db94?w=600&h=400&fit=crop",
         "created_at": datetime.now(timezone.utc).isoformat()
     },
     {
