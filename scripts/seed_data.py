@@ -50,7 +50,7 @@ SAMPLE_SERVICES = [
         "phone": "+34 933 456 789",
         "website": "https://www.gestoriataxipro.com",
         "address": "Carrer de Balmes, 123, Barcelona",
-        "image_url": "https://images.unsplash.com/photo-1721379800770-fda153205b1c?w=600&h=400&fit=crop",
+        "image_url": "https://images.unsplash.com/photo-1646772488020-0d37a2dbb43b?w=600&h=400&fit=crop",
         "created_at": datetime.now(timezone.utc).isoformat()
     },
     {
