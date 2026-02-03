@@ -143,6 +143,19 @@ def main():
     print("\n📧 Testing Contact Form...")
     tester.test_submit_contact_form()
     
+    # Test newsletter functionality
+    print("\n📰 Testing Newsletter Functionality...")
+    test_email = f"test_{datetime.now().strftime('%H%M%S')}@example.com"
+    
+    # Test first subscription
+    success1, response1 = tester.test_newsletter_subscribe("Test User", test_email)
+    
+    # Test duplicate email (should return info message)
+    success2, response2 = tester.test_newsletter_duplicate_email(test_email)
+    
+    # Test getting subscriptions
+    tester.test_get_newsletter_subscriptions()
+    
     # Print final results
     print("\n" + "=" * 50)
     print("📊 FINAL RESULTS:")
