@@ -23,7 +23,7 @@ SAMPLE_SERVICES = [
         "phone": "+34 612 345 678",
         "website": None,
         "address": "Barcelona, España",
-        "image_url": "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=600&h=400&fit=crop",
+        "image_url": "https://images.unsplash.com/photo-1656062584198-13b035bd9754?w=600&h=400&fit=crop",
         "created_at": datetime.now(timezone.utc).isoformat()
     },
     {
