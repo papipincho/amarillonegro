@@ -104,7 +104,7 @@ SAMPLE_SERVICES = [
         "phone": "+34 931 234 567",
         "website": "https://www.taximetrosdigitales.com",
         "address": "Carrer de la Marina, 89, Barcelona",
-        "image_url": "https://images.unsplash.com/photo-1758411897888-3ca658535fdf?w=600&h=400&fit=crop",
+        "image_url": "https://images.unsplash.com/photo-1769427470237-1318b3e3e72e?w=600&h=400&fit=crop",
         "created_at": datetime.now(timezone.utc).isoformat()
     },
     {
