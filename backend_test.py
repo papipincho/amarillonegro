@@ -86,6 +86,26 @@ class TaxiPortalAPITester:
         }
         return self.run_test("Submit Contact Form", "POST", "api/contact-submission", 200, test_data)
 
+    def test_newsletter_subscribe(self, name="Test User", email="test@example.com"):
+        """Test newsletter subscription"""
+        test_data = {
+            "name": name,
+            "email": email
+        }
+        return self.run_test("Newsletter Subscribe", "POST", "api/newsletter-subscribe", 200, test_data)
+
+    def test_newsletter_duplicate_email(self, email="test@example.com"):
+        """Test newsletter subscription with duplicate email"""
+        test_data = {
+            "name": "Another User",
+            "email": email
+        }
+        return self.run_test("Newsletter Duplicate Email", "POST", "api/newsletter-subscribe", 200, test_data)
+
+    def test_get_newsletter_subscriptions(self):
+        """Test getting all newsletter subscriptions"""
+        return self.run_test("Get Newsletter Subscriptions", "GET", "api/newsletter-subscriptions", 200)
+
     def test_all_categories(self):
         """Test all expected categories"""
         categories = ["licencias", "gestorias", "talleres", "elementos", "escuelas", "bolsa_trabajo", "emisoras", "seguros"]
