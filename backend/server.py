@@ -20,9 +20,9 @@ load_dotenv(ROOT_DIR / '.env')
 
 # MySQL connection pool
 db_config = {
-    "host": os.environ.get('MYSQL_HOST', 'localhost'),
-    "user": os.environ.get('MYSQL_USER', 'root'),
-    "password": os.environ.get('MYSQL_PASSWORD', ''),
+    "unix_socket": "/run/mysqld/mysqld.sock",
+    "user": "root",
+    "password": "",
     "database": os.environ.get('MYSQL_DATABASE', 'amarillonegro_db'),
     "pool_name": "mypool",
     "pool_size": 5
