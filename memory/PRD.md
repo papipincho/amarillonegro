@@ -48,8 +48,25 @@ Create a service portal for taxi drivers in Barcelona named "amarillonegro.com" 
 ## Tech Stack
 - **Frontend**: React
 - **Backend**: FastAPI
-- **Database**: MongoDB
+- **Database**: MySQL (compatible con cualquier hosting MySQL)
 - **Email**: Resend (optional, requires API key)
+
+## MySQL Configuration
+
+### Environment Variables (backend/.env)
+```
+MYSQL_HOST=tu_host_mysql
+MYSQL_PORT=3306
+MYSQL_USER=tu_usuario
+MYSQL_PASSWORD=tu_password
+MYSQL_DATABASE=amarillonegro_db
+```
+
+### Database Schema
+Execute `/app/backend/schema.sql` in your MySQL hosting to create tables:
+- `newsletter_subscriptions` - Newsletter subscribers
+- `contact_submissions` - Service publication requests
+- `services` - Published services directory
 
 ## What's Been Implemented ✅
 
