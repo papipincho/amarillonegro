@@ -9,27 +9,33 @@ const Navbar = () => {
 
   const isActive = (path) => location.pathname === path;
 
+  const handleNavigate = (path) => {
+    navigate(path);
+    window.scrollTo(0, 0);
+  };
+
   return (
     <nav className="bg-[#0A0A0A] border-b-4 border-[#FFCC00] sticky top-0 z-50" data-testid="navbar">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between h-20">
-          {/* Logo - Just the image */}
+          {/* Logo - Smaller with yellow tint */}
           <div
-            onClick={() => navigate("/")}
+            onClick={() => handleNavigate("/")}
             className="cursor-pointer"
             data-testid="logo"
           >
             <img 
               src="/logo.jpg" 
               alt="AmarilloNegro" 
-              className="h-16 w-auto object-contain"
+              className="h-12 w-auto object-contain"
+              style={{ filter: 'brightness(1.1) saturate(1.2)' }}
             />
           </div>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-6">
             <button
-              onClick={() => navigate("/")}
+              onClick={() => handleNavigate("/")}
               className={`font-medium transition-colors ${
                 isActive("/") ? "text-[#FFCC00]" : "text-white hover:text-[#FFCC00]"
               }`}
@@ -38,7 +44,7 @@ const Navbar = () => {
               Inicio
             </button>
             <button
-              onClick={() => navigate("/servicios")}
+              onClick={() => handleNavigate("/servicios")}
               className={`font-medium transition-colors ${
                 isActive("/servicios") ? "text-[#FFCC00]" : "text-white hover:text-[#FFCC00]"
               }`}
@@ -47,7 +53,7 @@ const Navbar = () => {
               Servicios
             </button>
             <button
-              onClick={() => navigate("/noticias")}
+              onClick={() => handleNavigate("/noticias")}
               className={`font-medium transition-colors ${
                 isActive("/noticias") ? "text-[#FFCC00]" : "text-white hover:text-[#FFCC00]"
               }`}
@@ -56,7 +62,7 @@ const Navbar = () => {
               Noticias
             </button>
             <button
-              onClick={() => navigate("/publicar-servicio")}
+              onClick={() => handleNavigate("/publicar-servicio")}
               className="bg-[#FFCC00] text-black px-6 py-2 border-2 border-white font-bold uppercase text-sm hover:bg-white transition-colors"
               data-testid="nav-publish"
             >
@@ -80,7 +86,7 @@ const Navbar = () => {
             <div className="flex flex-col gap-3 pt-4">
               <button
                 onClick={() => {
-                  navigate("/");
+                  handleNavigate("/");
                   setMobileMenuOpen(false);
                 }}
                 className={`font-medium text-left ${
@@ -91,7 +97,7 @@ const Navbar = () => {
               </button>
               <button
                 onClick={() => {
-                  navigate("/servicios");
+                  handleNavigate("/servicios");
                   setMobileMenuOpen(false);
                 }}
                 className={`font-medium text-left ${
@@ -102,7 +108,7 @@ const Navbar = () => {
               </button>
               <button
                 onClick={() => {
-                  navigate("/noticias");
+                  handleNavigate("/noticias");
                   setMobileMenuOpen(false);
                 }}
                 className={`font-medium text-left ${
@@ -113,7 +119,7 @@ const Navbar = () => {
               </button>
               <button
                 onClick={() => {
-                  navigate("/publicar-servicio");
+                  handleNavigate("/publicar-servicio");
                   setMobileMenuOpen(false);
                 }}
                 className="bg-[#FFCC00] text-black px-6 py-2 border-2 border-white font-bold uppercase text-sm"

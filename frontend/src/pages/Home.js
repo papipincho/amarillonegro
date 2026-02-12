@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Briefcase, FileText, Wrench, Gauge, GraduationCap, Users, Radio, Shield } from "lucide-react";
 
@@ -64,6 +64,15 @@ const CATEGORIES = [
 const Home = () => {
   const navigate = useNavigate();
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  const handleNavigate = (path) => {
+    navigate(path);
+    window.scrollTo(0, 0);
+  };
+
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -90,7 +99,7 @@ const Home = () => {
             El directorio completo de servicios profesionales para el sector del taxi en Barcelona
           </p>
           <button
-            onClick={() => navigate("/publicar-servicio")}
+            onClick={() => handleNavigate("/publicar-servicio")}
             className="btn-primary inline-block"
             data-testid="publish-service-cta"
           >
@@ -115,7 +124,7 @@ const Home = () => {
               return (
                 <div
                   key={category.id}
-                  onClick={() => navigate(`/categoria/${category.id}`)}
+                  onClick={() => handleNavigate(`/categoria/${category.id}`)}
                   className="category-card h-64 rounded-sm"
                   data-testid={`category-card-${category.id}`}
                 >
@@ -148,7 +157,7 @@ const Home = () => {
             Publica tu negocio en nuestro portal y llega a cientos de profesionales del taxi en Barcelona
           </p>
           <button
-            onClick={() => navigate("/publicar-servicio")}
+            onClick={() => handleNavigate("/publicar-servicio")}
             className="btn-secondary"
             data-testid="footer-cta-button"
           >

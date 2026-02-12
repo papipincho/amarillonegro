@@ -13,6 +13,11 @@ const Footer = () => {
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState("");
 
+  const handleNavigate = (path) => {
+    navigate(path);
+    window.scrollTo(0, 0);
+  };
+
   const handleNewsletterSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -107,28 +112,28 @@ const Footer = () => {
             </h4>
             <ul className="space-y-2">
               <li>
-                <a href="/" className="text-zinc-400 hover:text-[#FFCC00] transition-colors">
+                <button onClick={() => handleNavigate("/")} className="text-zinc-400 hover:text-[#FFCC00] transition-colors">
                   Inicio
-                </a>
+                </button>
               </li>
               <li>
-                <a href="/servicios" className="text-zinc-400 hover:text-[#FFCC00] transition-colors">
+                <button onClick={() => handleNavigate("/servicios")} className="text-zinc-400 hover:text-[#FFCC00] transition-colors">
                   Servicios
-                </a>
+                </button>
               </li>
               <li>
-                <a href="/noticias" className="text-zinc-400 hover:text-[#FFCC00] transition-colors">
+                <button onClick={() => handleNavigate("/noticias")} className="text-zinc-400 hover:text-[#FFCC00] transition-colors">
                   Noticias
-                </a>
+                </button>
               </li>
               <li>
-                <a href="/publicar-servicio" className="text-zinc-400 hover:text-[#FFCC00] transition-colors">
+                <button onClick={() => handleNavigate("/publicar-servicio")} className="text-zinc-400 hover:text-[#FFCC00] transition-colors">
                   Publicar Anuncio
-                </a>
+                </button>
               </li>
               <li>
                 <button
-                  onClick={() => navigate("/admin")}
+                  onClick={() => handleNavigate("/admin")}
                   className="text-zinc-400 hover:text-[#FFCC00] transition-colors"
                   data-testid="admin-link"
                 >

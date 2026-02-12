@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Briefcase, FileText, Wrench, Gauge, GraduationCap, Users, Radio, Shield } from "lucide-react";
 
@@ -64,6 +64,15 @@ const CATEGORIES = [
 const ServicesPage = () => {
   const navigate = useNavigate();
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  const handleNavigate = (path) => {
+    navigate(path);
+    window.scrollTo(0, 0);
+  };
+
   return (
     <div className="min-h-screen bg-zinc-100">
       {/* Header */}
@@ -87,7 +96,7 @@ const ServicesPage = () => {
               return (
                 <div
                   key={category.id}
-                  onClick={() => navigate(`/categoria/${category.id}`)}
+                  onClick={() => handleNavigate(`/categoria/${category.id}`)}
                   className="category-card h-64 rounded-sm"
                   data-testid={`service-category-${category.id}`}
                 >
