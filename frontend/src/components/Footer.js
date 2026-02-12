@@ -8,7 +8,7 @@ const API = `${BACKEND_URL}/api`;
 
 const Footer = () => {
   const navigate = useNavigate();
-  const [newsletterData, setNewsletterData] = useState({ name: "", email: "" });
+  const [newsletterData, setNewsletterData] = useState({ name: "", email: "", phone: "" });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState("");
@@ -27,7 +27,7 @@ const Footer = () => {
       const response = await axios.post(`${API}/newsletter-subscribe`, newsletterData);
       setMessageType("success");
       setMessage(response.data.message);
-      setNewsletterData({ name: "", email: "" });
+      setNewsletterData({ name: "", email: "", phone: "" });
     } catch (error) {
       setMessageType("error");
       setMessage("Error al suscribirte. Por favor, inténtalo de nuevo.");
@@ -45,12 +45,15 @@ const Footer = () => {
           <h3 className="text-3xl font-bold text-black mb-4 text-center tracking-tight">
             RECIBE LAS NOVEDADES
           </h3>
-          <p className="text-center text-black mb-6">
+          <p className="text-center text-black mb-2">
             Suscríbete para estar al día de todas las noticias del sector del taxi en Barcelona
           </p>
+          <p className="text-center text-black mb-6 text-sm font-medium">
+            ✅ También te añadiremos al canal de WhatsApp de AmarilloNegro
+          </p>
           
-          <form onSubmit={handleNewsletterSubmit} className="max-w-2xl mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <form onSubmit={handleNewsletterSubmit} className="max-w-3xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <input
                 type="text"
                 placeholder="Tu nombre"
@@ -68,6 +71,15 @@ const Footer = () => {
                 required
                 className="brutalist-input px-4 bg-white text-black placeholder-zinc-500"
                 data-testid="newsletter-email"
+              />
+              <input
+                type="tel"
+                placeholder="Tu móvil"
+                value={newsletterData.phone}
+                onChange={(e) => setNewsletterData({ ...newsletterData, phone: e.target.value })}
+                required
+                className="brutalist-input px-4 bg-white text-black placeholder-zinc-500 mono"
+                data-testid="newsletter-phone"
               />
               <button
                 type="submit"
