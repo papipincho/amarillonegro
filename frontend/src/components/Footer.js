@@ -57,7 +57,7 @@ const Footer = () => {
                 value={newsletterData.name}
                 onChange={(e) => setNewsletterData({ ...newsletterData, name: e.target.value })}
                 required
-                className="brutalist-input px-4 bg-white"
+                className="brutalist-input px-4 bg-white text-black placeholder-zinc-500"
                 data-testid="newsletter-name"
               />
               <input
@@ -66,7 +66,7 @@ const Footer = () => {
                 value={newsletterData.email}
                 onChange={(e) => setNewsletterData({ ...newsletterData, email: e.target.value })}
                 required
-                className="brutalist-input px-4 bg-white"
+                className="brutalist-input px-4 bg-white text-black placeholder-zinc-500"
                 data-testid="newsletter-email"
               />
               <button
