@@ -1,14 +1,16 @@
-from fastapi import FastAPI, APIRouter, HTTPException
+from fastapi import FastAPI, APIRouter, HTTPException, Depends, status
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
-from motor.motor_asyncio import AsyncIOMotorClient
+import mysql.connector
+from mysql.connector import pooling
 import os
 import logging
 import asyncio
+import secrets
 from pathlib import Path
-from pydantic import BaseModel, Field, ConfigDict, EmailStr
+from pydantic import BaseModel, EmailStr
 from typing import List, Optional
-import uuid
 from datetime import datetime, timezone
 import resend
 
@@ -16,10 +18,22 @@ import resend
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
-# MongoDB connection
-mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
+# MySQL connection pool
+db_config = {
+    "host": os.environ.get('MYSQL_HOST', 'localhost'),
+    "user": os.environ.get('MYSQL_USER', 'root'),
+    "password": os.environ.get('MYSQL_PASSWORD', ''),
+    "database": os.environ.get('MYSQL_DATABASE', 'amarillonegro_db'),
+    "pool_name": "mypool",
+    "pool_size": 5
+}
+
+try:
+    connection_pool = pooling.MySQLConnectionPool(**db_config)
+    logging.info("MySQL connection pool created successfully")
+except mysql.connector.Error as err:
+    logging.error(f"Error creating connection pool: {err}")
+    connection_pool = None
 
 # Resend configuration
 RESEND_API_KEY = os.environ.get('RESEND_API_KEY', '')
@@ -27,11 +41,13 @@ SENDER_EMAIL = os.environ.get('SENDER_EMAIL', 'onboarding@resend.dev')
 if RESEND_API_KEY:
     resend.api_key = RESEND_API_KEY
 
-# Create the main app without a prefix
-app = FastAPI()
+# Admin credentials
+ADMIN_PASSWORD = "Amarillonegro1?"
 
-# Create a router with the /api prefix
+# Create the main app
+app = FastAPI()
 api_router = APIRouter(prefix="/api")
+security = HTTPBasic()
 
 # Configure logging
 logging.basicConfig(
@@ -41,11 +57,27 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-# Define Models
+def get_db_connection():
+    """Get a connection from the pool"""
+    if connection_pool:
+        return connection_pool.get_connection()
+    return None
+
+def verify_admin(credentials: HTTPBasicCredentials = Depends(security)):
+    """Verify admin credentials"""
+    correct_password = secrets.compare_digest(credentials.password, ADMIN_PASSWORD)
+    if not correct_password:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Contraseña incorrecta",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+    return credentials.username
+
+
+# Pydantic Models
 class Service(BaseModel):
-    model_config = ConfigDict(extra="ignore")
-    
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    id: Optional[int] = None
     category: str
     name: str
     description: str
@@ -55,7 +87,7 @@ class Service(BaseModel):
     website: Optional[str] = None
     address: Optional[str] = None
     image_url: Optional[str] = None
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: Optional[datetime] = None
 
 class ServiceCreate(BaseModel):
     category: str
@@ -69,17 +101,15 @@ class ServiceCreate(BaseModel):
     image_url: Optional[str] = None
 
 class ContactSubmission(BaseModel):
-    model_config = ConfigDict(extra="ignore")
-    
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    id: Optional[int] = None
     name: str
-    email: EmailStr
+    email: str
     phone: str
     service_category: str
     business_name: str
     description: str
     website: Optional[str] = None
-    submitted_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    submitted_at: Optional[datetime] = None
 
 class ContactSubmissionCreate(BaseModel):
     name: str
@@ -91,12 +121,10 @@ class ContactSubmissionCreate(BaseModel):
     website: Optional[str] = None
 
 class NewsletterSubscription(BaseModel):
-    model_config = ConfigDict(extra="ignore")
-    
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    id: Optional[int] = None
     name: str
-    email: EmailStr
-    subscribed_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    email: str
+    subscribed_at: Optional[datetime] = None
 
 class NewsletterSubscriptionCreate(BaseModel):
     name: str
@@ -106,152 +134,209 @@ class NewsletterSubscriptionCreate(BaseModel):
 # Routes
 @api_router.get("/")
 async def root():
-    return {"message": "Portal Taxi Barcelona API"}
+    return {"message": "AmarilloNegro.com - Portal Taxi Barcelona API"}
 
 @api_router.get("/services", response_model=List[Service])
 async def get_all_services():
-    services = await db.services.find({}, {"_id": 0}).to_list(1000)
-    for service in services:
-        if isinstance(service.get('created_at'), str):
-            service['created_at'] = datetime.fromisoformat(service['created_at'])
-    return services
+    conn = get_db_connection()
+    if not conn:
+        raise HTTPException(status_code=500, detail="Database connection error")
+    
+    try:
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM services ORDER BY created_at DESC")
+        services = cursor.fetchall()
+        cursor.close()
+        return services
+    except mysql.connector.Error as err:
+        logger.error(f"Error fetching services: {err}")
+        raise HTTPException(status_code=500, detail=str(err))
+    finally:
+        conn.close()
 
 @api_router.get("/services/{category}", response_model=List[Service])
 async def get_services_by_category(category: str):
-    services = await db.services.find({"category": category}, {"_id": 0}).to_list(1000)
-    for service in services:
-        if isinstance(service.get('created_at'), str):
-            service['created_at'] = datetime.fromisoformat(service['created_at'])
-    return services
+    conn = get_db_connection()
+    if not conn:
+        raise HTTPException(status_code=500, detail="Database connection error")
+    
+    try:
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM services WHERE category = %s ORDER BY created_at DESC", (category,))
+        services = cursor.fetchall()
+        cursor.close()
+        return services
+    except mysql.connector.Error as err:
+        logger.error(f"Error fetching services by category: {err}")
+        raise HTTPException(status_code=500, detail=str(err))
+    finally:
+        conn.close()
 
 @api_router.post("/services", response_model=Service)
 async def create_service(input: ServiceCreate):
-    service_dict = input.model_dump()
-    service_obj = Service(**service_dict)
+    conn = get_db_connection()
+    if not conn:
+        raise HTTPException(status_code=500, detail="Database connection error")
     
-    doc = service_obj.model_dump()
-    doc['created_at'] = doc['created_at'].isoformat()
-    
-    await db.services.insert_one(doc)
-    return service_obj
+    try:
+        cursor = conn.cursor()
+        query = """INSERT INTO services (category, name, description, contact_name, email, phone, website, address, image_url, created_at)
+                   VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+        values = (
+            input.category, input.name, input.description, input.contact_name,
+            input.email, input.phone, input.website, input.address, input.image_url,
+            datetime.now(timezone.utc)
+        )
+        cursor.execute(query, values)
+        conn.commit()
+        service_id = cursor.lastrowid
+        cursor.close()
+        
+        # Fetch the created service
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM services WHERE id = %s", (service_id,))
+        service = cursor.fetchone()
+        cursor.close()
+        return service
+    except mysql.connector.Error as err:
+        logger.error(f"Error creating service: {err}")
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=str(err))
+    finally:
+        conn.close()
 
 @api_router.post("/contact-submission")
 async def submit_contact_form(input: ContactSubmissionCreate):
-    # Create submission object
-    submission_dict = input.model_dump()
-    submission_obj = ContactSubmission(**submission_dict)
+    conn = get_db_connection()
+    if not conn:
+        raise HTTPException(status_code=500, detail="Database connection error")
     
-    # Save to database
-    doc = submission_obj.model_dump()
-    doc['submitted_at'] = doc['submitted_at'].isoformat()
-    await db.contact_submissions.insert_one(doc)
-    
-    # Send email if Resend is configured
-    if RESEND_API_KEY:
-        try:
-            html_content = f"""
-            <html>
-                <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-                    <div style="max-width: 600px; margin: 0 auto; padding: 20px; border: 2px solid #FFCC00;">
-                        <h2 style="color: #0A0A0A; border-bottom: 3px solid #FFCC00; padding-bottom: 10px;">
-                            Nueva solicitud de publicación - Portal Taxi Barcelona
-                        </h2>
-                        
-                        <div style="background-color: #f9f9f9; padding: 15px; margin: 20px 0;">
-                            <h3 style="color: #FFCC00; margin-top: 0;">Datos de contacto:</h3>
-                            <p><strong>Nombre:</strong> {input.name}</p>
-                            <p><strong>Email:</strong> {input.email}</p>
-                            <p><strong>Teléfono:</strong> {input.phone}</p>
+    try:
+        cursor = conn.cursor()
+        query = """INSERT INTO contact_submissions (name, email, phone, service_category, business_name, description, website, submitted_at)
+                   VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"""
+        values = (
+            input.name, input.email, input.phone, input.service_category,
+            input.business_name, input.description, input.website,
+            datetime.now(timezone.utc)
+        )
+        cursor.execute(query, values)
+        conn.commit()
+        submission_id = cursor.lastrowid
+        cursor.close()
+        
+        # Send email if Resend is configured
+        if RESEND_API_KEY:
+            try:
+                html_content = f"""
+                <html>
+                    <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+                        <div style="max-width: 600px; margin: 0 auto; padding: 20px; border: 2px solid #FFCC00;">
+                            <h2 style="color: #0A0A0A; border-bottom: 3px solid #FFCC00; padding-bottom: 10px;">
+                                Nueva solicitud - AmarilloNegro.com
+                            </h2>
+                            <div style="background-color: #f9f9f9; padding: 15px; margin: 20px 0;">
+                                <h3 style="color: #FFCC00; margin-top: 0;">Datos de contacto:</h3>
+                                <p><strong>Nombre:</strong> {input.name}</p>
+                                <p><strong>Email:</strong> {input.email}</p>
+                                <p><strong>Teléfono:</strong> {input.phone}</p>
+                            </div>
+                            <div style="background-color: #f9f9f9; padding: 15px; margin: 20px 0;">
+                                <h3 style="color: #FFCC00; margin-top: 0;">Información del servicio:</h3>
+                                <p><strong>Negocio:</strong> {input.business_name}</p>
+                                <p><strong>Categoría:</strong> {input.service_category}</p>
+                                <p><strong>Descripción:</strong> {input.description}</p>
+                                {f'<p><strong>Web:</strong> {input.website}</p>' if input.website else ''}
+                            </div>
                         </div>
-                        
-                        <div style="background-color: #f9f9f9; padding: 15px; margin: 20px 0;">
-                            <h3 style="color: #FFCC00; margin-top: 0;">Información del servicio:</h3>
-                            <p><strong>Nombre del negocio:</strong> {input.business_name}</p>
-                            <p><strong>Categoría:</strong> {input.service_category}</p>
-                            <p><strong>Descripción:</strong> {input.description}</p>
-                            {f'<p><strong>Sitio web:</strong> {input.website}</p>' if input.website else ''}
-                        </div>
-                        
-                        <p style="color: #666; font-size: 12px; margin-top: 30px; border-top: 1px solid #ddd; padding-top: 15px;">
-                            Este correo fue enviado automáticamente desde el formulario de publicación del Portal Taxi Barcelona.
-                        </p>
-                    </div>
-                </body>
-            </html>
-            """
-            
-            params = {
-                "from": SENDER_EMAIL,
-                "to": ["info@taxis.cat"],
-                "subject": f"Nueva solicitud: {input.business_name} - {input.service_category}",
-                "html": html_content
-            }
-            
-            email_result = await asyncio.to_thread(resend.Emails.send, params)
-            logger.info(f"Email sent successfully: {email_result.get('id')}")
-            
-            return {
-                "status": "success",
-                "message": "Tu solicitud ha sido enviada correctamente. Te contactaremos pronto.",
-                "submission_id": submission_obj.id,
-                "email_sent": True
-            }
-        except Exception as e:
-            logger.error(f"Failed to send email: {str(e)}")
-            return {
-                "status": "partial_success",
-                "message": "Tu solicitud ha sido guardada, pero hubo un problema al enviar el email.",
-                "submission_id": submission_obj.id,
-                "email_sent": False,
-                "error": str(e)
-            }
-    else:
-        logger.warning("Resend API key not configured")
-        return {
-            "status": "success",
-            "message": "Tu solicitud ha sido guardada correctamente.",
-            "submission_id": submission_obj.id,
-            "email_sent": False,
-            "note": "Email not configured"
-        }
+                    </body>
+                </html>
+                """
+                
+                params = {
+                    "from": SENDER_EMAIL,
+                    "to": ["info@taxis.cat"],
+                    "subject": f"Nueva solicitud: {input.business_name}",
+                    "html": html_content
+                }
+                
+                await asyncio.to_thread(resend.Emails.send, params)
+                logger.info(f"Email sent for submission {submission_id}")
+                return {"status": "success", "message": "Solicitud enviada correctamente", "id": submission_id, "email_sent": True}
+            except Exception as e:
+                logger.error(f"Email error: {str(e)}")
+                return {"status": "success", "message": "Solicitud guardada", "id": submission_id, "email_sent": False}
+        
+        return {"status": "success", "message": "Solicitud guardada correctamente", "id": submission_id}
+    except mysql.connector.Error as err:
+        logger.error(f"Error saving contact submission: {err}")
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=str(err))
+    finally:
+        conn.close()
 
 @api_router.post("/newsletter-subscribe")
 async def subscribe_newsletter(input: NewsletterSubscriptionCreate):
-    # Check if email already exists
-    existing = await db.newsletter_subscriptions.find_one({"email": input.email}, {"_id": 0})
-    if existing:
+    conn = get_db_connection()
+    if not conn:
+        raise HTTPException(status_code=500, detail="Database connection error")
+    
+    try:
+        cursor = conn.cursor(dictionary=True)
+        # Check if email already exists
+        cursor.execute("SELECT id FROM newsletter_subscriptions WHERE email = %s", (input.email,))
+        existing = cursor.fetchone()
+        
+        if existing:
+            cursor.close()
+            return {"status": "info", "message": "Este email ya está suscrito"}
+        
+        # Insert new subscription
+        query = "INSERT INTO newsletter_subscriptions (name, email, subscribed_at) VALUES (%s, %s, %s)"
+        cursor.execute(query, (input.name, input.email, datetime.now(timezone.utc)))
+        conn.commit()
+        subscription_id = cursor.lastrowid
+        cursor.close()
+        
+        logger.info(f"New newsletter subscription: {input.email}")
         return {
-            "status": "info",
-            "message": "Este email ya está suscrito a nuestras novedades."
+            "status": "success",
+            "message": "¡Gracias por suscribirte! Recibirás las últimas novedades.",
+            "id": subscription_id
         }
-    
-    # Create subscription object
-    subscription_dict = input.model_dump()
-    subscription_obj = NewsletterSubscription(**subscription_dict)
-    
-    # Save to database
-    doc = subscription_obj.model_dump()
-    doc['subscribed_at'] = doc['subscribed_at'].isoformat()
-    await db.newsletter_subscriptions.insert_one(doc)
-    
-    logger.info(f"New newsletter subscription: {input.email}")
-    
-    return {
-        "status": "success",
-        "message": "¡Gracias por suscribirte! Recibirás las últimas novedades del sector.",
-        "subscription_id": subscription_obj.id
-    }
+    except mysql.connector.Error as err:
+        logger.error(f"Error subscribing to newsletter: {err}")
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=str(err))
+    finally:
+        conn.close()
 
-@api_router.get("/newsletter-subscriptions")
-async def get_newsletter_subscriptions():
-    subscriptions = await db.newsletter_subscriptions.find({}, {"_id": 0}).to_list(1000)
-    for sub in subscriptions:
-        if isinstance(sub.get('subscribed_at'), str):
-            sub['subscribed_at'] = datetime.fromisoformat(sub['subscribed_at'])
-    return subscriptions
+@api_router.get("/admin/newsletter-subscriptions", response_model=List[NewsletterSubscription])
+async def get_newsletter_subscriptions(username: str = Depends(verify_admin)):
+    conn = get_db_connection()
+    if not conn:
+        raise HTTPException(status_code=500, detail="Database connection error")
+    
+    try:
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM newsletter_subscriptions ORDER BY subscribed_at DESC")
+        subscriptions = cursor.fetchall()
+        cursor.close()
+        return subscriptions
+    except mysql.connector.Error as err:
+        logger.error(f"Error fetching subscriptions: {err}")
+        raise HTTPException(status_code=500, detail=str(err))
+    finally:
+        conn.close()
+
+@api_router.post("/admin/verify")
+async def verify_admin_password(credentials: HTTPBasicCredentials = Depends(security)):
+    """Verify admin password for frontend login"""
+    verify_admin(credentials)
+    return {"status": "success", "message": "Autenticación correcta"}
 
 
-# Include the router in the main app
+# Include router
 app.include_router(api_router)
 
 app.add_middleware(
@@ -262,6 +347,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.on_event("startup")
+async def startup_event():
+    logger.info("Application started")
+
 @app.on_event("shutdown")
-async def shutdown_db_client():
-    client.close()
+async def shutdown_event():
+    logger.info("Application shutdown")
