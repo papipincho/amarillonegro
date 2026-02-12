@@ -24,6 +24,7 @@ const CategoryPage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     const fetchServices = async () => {
       try {
         const response = await axios.get(`${API}/services/${category}`);

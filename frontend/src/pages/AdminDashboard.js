@@ -110,6 +110,7 @@ const AdminDashboard = () => {
   };
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     const auth = sessionStorage.getItem('adminAuth');
     if (auth) {
       setAuthenticated(true);

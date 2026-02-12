@@ -22,6 +22,15 @@ const NEWS_ARTICLES = [
 const NewsPage = () => {
   const navigate = useNavigate();
 
+  React.useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  const handleNavigate = (path) => {
+    navigate(path);
+    window.scrollTo(0, 0);
+  };
+
   return (
     <div className="min-h-screen bg-zinc-100">
       {/* Header */}
@@ -44,7 +53,7 @@ const NewsPage = () => {
               <div
                 key={article.slug}
                 className="brutalist-card overflow-hidden rounded-sm cursor-pointer"
-                onClick={() => navigate(`/noticias/${article.slug}`)}
+                onClick={() => handleNavigate(`/noticias/${article.slug}`)}
                 data-testid={`news-article-${article.slug}`}
               >
                 <div className="md:flex">
