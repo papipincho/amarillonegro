@@ -45,18 +45,15 @@ const Footer = () => {
           <h3 className="text-3xl font-bold text-black mb-4 text-center tracking-tight">
             RECIBE LAS NOVEDADES
           </h3>
-          <p className="text-center text-black mb-2">
+          <p className="text-center text-black mb-6">
             Suscríbete para estar al día de todas las noticias del sector del taxi en Barcelona
-          </p>
-          <p className="text-center text-black mb-6 text-sm font-medium">
-            ✅ También te añadiremos al canal de WhatsApp de AmarilloNegro
           </p>
           
           <form onSubmit={handleNewsletterSubmit} className="max-w-3xl mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <input
                 type="text"
-                placeholder="Tu nombre"
+                placeholder="Tu nombre *"
                 value={newsletterData.name}
                 onChange={(e) => setNewsletterData({ ...newsletterData, name: e.target.value })}
                 required
@@ -65,7 +62,7 @@ const Footer = () => {
               />
               <input
                 type="email"
-                placeholder="Tu email"
+                placeholder="Tu email *"
                 value={newsletterData.email}
                 onChange={(e) => setNewsletterData({ ...newsletterData, email: e.target.value })}
                 required
@@ -77,7 +74,6 @@ const Footer = () => {
                 placeholder="Tu móvil"
                 value={newsletterData.phone}
                 onChange={(e) => setNewsletterData({ ...newsletterData, phone: e.target.value })}
-                required
                 className="brutalist-input px-4 bg-white text-black placeholder-zinc-500 mono"
                 data-testid="newsletter-phone"
               />
@@ -90,6 +86,9 @@ const Footer = () => {
                 {loading ? "Enviando..." : "Suscribirse"}
               </button>
             </div>
+            <p className="mt-3 text-center text-black text-sm">
+              📱 Si quieres que te añadamos al canal de WhatsApp, introduce tu móvil
+            </p>
             {message && (
               <p
                 className={`mt-4 text-center font-medium ${
