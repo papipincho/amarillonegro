@@ -358,6 +358,7 @@ const AdminDashboard = () => {
                       <th className="px-6 py-4 text-left text-xs font-bold text-black uppercase">#</th>
                       <th className="px-6 py-4 text-left text-xs font-bold text-black uppercase">Nombre</th>
                       <th className="px-6 py-4 text-left text-xs font-bold text-black uppercase">Email</th>
+                      <th className="px-6 py-4 text-left text-xs font-bold text-black uppercase">Teléfono</th>
                       <th className="px-6 py-4 text-left text-xs font-bold text-black uppercase">Fecha</th>
                     </tr>
                   </thead>
@@ -378,6 +379,9 @@ const AdminDashboard = () => {
                               {subscriber.email}
                             </a>
                           </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="text-sm text-zinc-700 font-mono">{subscriber.phone || "-"}</span>
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-2">

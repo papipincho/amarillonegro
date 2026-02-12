@@ -124,11 +124,13 @@ class NewsletterSubscription(BaseModel):
     id: Optional[int] = None
     name: str
     email: str
+    phone: Optional[str] = None
     subscribed_at: Optional[datetime] = None
 
 class NewsletterSubscriptionCreate(BaseModel):
     name: str
     email: EmailStr
+    phone: str
 
 
 # Routes
