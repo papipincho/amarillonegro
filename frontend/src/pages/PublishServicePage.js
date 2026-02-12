@@ -39,7 +39,9 @@ const PublishServicePage = () => {
 
   React.useEffect(() => {
     if (success) {
-      setTimeout(() => window.scrollTo({ top: 0, behavior: 'instant' }), 100);
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'instant' });
+      }, 50);
     }
   }, [success]);
 
