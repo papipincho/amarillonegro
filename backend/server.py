@@ -2,38 +2,33 @@ from fastapi import FastAPI, APIRouter, HTTPException, Depends, status
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
-import mysql.connector
-from mysql.connector import pooling
+from pymongo import MongoClient
 import os
 import logging
 import asyncio
 import secrets
 from pathlib import Path
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from typing import List, Optional
 from datetime import datetime, timezone
+from bson import ObjectId
 import resend
 
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
-# MySQL connection pool
-db_config = {
-    "unix_socket": "/run/mysqld/mysqld.sock",
-    "user": "root",
-    "password": "",
-    "database": os.environ.get('MYSQL_DATABASE', 'amarillonegro_db'),
-    "pool_name": "mypool",
-    "pool_size": 5
-}
+# MongoDB connection
+MONGO_URL = os.environ.get('MONGO_URL', 'mongodb://localhost:27017')
+DB_NAME = os.environ.get('DB_NAME', 'amarillonegro_db')
 
 try:
-    connection_pool = pooling.MySQLConnectionPool(**db_config)
-    logging.info("MySQL connection pool created successfully")
-except mysql.connector.Error as err:
-    logging.error(f"Error creating connection pool: {err}")
-    connection_pool = None
+    mongo_client = MongoClient(MONGO_URL)
+    db = mongo_client[DB_NAME]
+    logging.info("MongoDB connection established successfully")
+except Exception as e:
+    logging.error(f"Error connecting to MongoDB: {e}")
+    db = None
 
 # Resend configuration
 RESEND_API_KEY = os.environ.get('RESEND_API_KEY', '')
@@ -57,12 +52,6 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def get_db_connection():
-    """Get a connection from the pool"""
-    if connection_pool:
-        return connection_pool.get_connection()
-    return None
-
 def verify_admin(credentials: HTTPBasicCredentials = Depends(security)):
     """Verify admin credentials"""
     correct_password = secrets.compare_digest(credentials.password, ADMIN_PASSWORD)
@@ -75,9 +64,18 @@ def verify_admin(credentials: HTTPBasicCredentials = Depends(security)):
     return credentials.username
 
 
+# Helper function to serialize MongoDB documents
+def serialize_doc(doc):
+    """Convert MongoDB document to JSON-serializable dict"""
+    if doc is None:
+        return None
+    doc['id'] = str(doc.pop('_id'))
+    return doc
+
+
 # Pydantic Models
 class Service(BaseModel):
-    id: Optional[int] = None
+    id: Optional[str] = None
     category: str
     name: str
     description: str
@@ -101,7 +99,7 @@ class ServiceCreate(BaseModel):
     image_url: Optional[str] = None
 
 class ContactSubmission(BaseModel):
-    id: Optional[int] = None
+    id: Optional[str] = None
     name: str
     email: str
     phone: str
@@ -121,7 +119,7 @@ class ContactSubmissionCreate(BaseModel):
     website: Optional[str] = None
 
 class NewsletterSubscription(BaseModel):
-    id: Optional[int] = None
+    id: Optional[str] = None
     name: str
     email: str
     phone: Optional[str] = None
@@ -140,92 +138,71 @@ async def root():
 
 @api_router.get("/services", response_model=List[Service])
 async def get_all_services():
-    conn = get_db_connection()
-    if not conn:
+    if not db:
         raise HTTPException(status_code=500, detail="Database connection error")
     
     try:
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM services ORDER BY created_at DESC")
-        services = cursor.fetchall()
-        cursor.close()
-        return services
-    except mysql.connector.Error as err:
-        logger.error(f"Error fetching services: {err}")
-        raise HTTPException(status_code=500, detail=str(err))
-    finally:
-        conn.close()
+        services = list(db.services.find().sort("created_at", -1))
+        return [serialize_doc(s) for s in services]
+    except Exception as e:
+        logger.error(f"Error fetching services: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.get("/services/{category}", response_model=List[Service])
 async def get_services_by_category(category: str):
-    conn = get_db_connection()
-    if not conn:
+    if not db:
         raise HTTPException(status_code=500, detail="Database connection error")
     
     try:
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM services WHERE category = %s ORDER BY created_at DESC", (category,))
-        services = cursor.fetchall()
-        cursor.close()
-        return services
-    except mysql.connector.Error as err:
-        logger.error(f"Error fetching services by category: {err}")
-        raise HTTPException(status_code=500, detail=str(err))
-    finally:
-        conn.close()
+        services = list(db.services.find({"category": category}).sort("created_at", -1))
+        return [serialize_doc(s) for s in services]
+    except Exception as e:
+        logger.error(f"Error fetching services by category: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.post("/services", response_model=Service)
 async def create_service(input: ServiceCreate):
-    conn = get_db_connection()
-    if not conn:
+    if not db:
         raise HTTPException(status_code=500, detail="Database connection error")
     
     try:
-        cursor = conn.cursor()
-        query = """INSERT INTO services (category, name, description, contact_name, email, phone, website, address, image_url, created_at)
-                   VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
-        values = (
-            input.category, input.name, input.description, input.contact_name,
-            input.email, input.phone, input.website, input.address, input.image_url,
-            datetime.now(timezone.utc)
-        )
-        cursor.execute(query, values)
-        conn.commit()
-        service_id = cursor.lastrowid
-        cursor.close()
-        
-        # Fetch the created service
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM services WHERE id = %s", (service_id,))
-        service = cursor.fetchone()
-        cursor.close()
-        return service
-    except mysql.connector.Error as err:
-        logger.error(f"Error creating service: {err}")
-        conn.rollback()
-        raise HTTPException(status_code=500, detail=str(err))
-    finally:
-        conn.close()
+        service_data = {
+            "category": input.category,
+            "name": input.name,
+            "description": input.description,
+            "contact_name": input.contact_name,
+            "email": input.email,
+            "phone": input.phone,
+            "website": input.website,
+            "address": input.address,
+            "image_url": input.image_url,
+            "created_at": datetime.now(timezone.utc)
+        }
+        result = db.services.insert_one(service_data)
+        service_data['id'] = str(result.inserted_id)
+        return service_data
+    except Exception as e:
+        logger.error(f"Error creating service: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.post("/contact-submission")
 async def submit_contact_form(input: ContactSubmissionCreate):
-    conn = get_db_connection()
-    if not conn:
+    if not db:
         raise HTTPException(status_code=500, detail="Database connection error")
     
     try:
-        cursor = conn.cursor()
-        query = """INSERT INTO contact_submissions (name, email, phone, service_category, business_name, description, website, submitted_at)
-                   VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"""
-        values = (
-            input.name, input.email, input.phone, input.service_category,
-            input.business_name, input.description, input.website,
-            datetime.now(timezone.utc)
-        )
-        cursor.execute(query, values)
-        conn.commit()
-        submission_id = cursor.lastrowid
-        cursor.close()
+        submission_data = {
+            "name": input.name,
+            "email": input.email,
+            "phone": input.phone,
+            "service_category": input.service_category,
+            "business_name": input.business_name,
+            "description": input.description,
+            "website": input.website,
+            "submitted_at": datetime.now(timezone.utc)
+        }
+        result = db.contact_submissions.insert_one(submission_data)
+        submission_id = str(result.inserted_id)
         
         # Send email if Resend is configured
         if RESEND_API_KEY:
@@ -270,35 +247,31 @@ async def submit_contact_form(input: ContactSubmissionCreate):
                 return {"status": "success", "message": "Solicitud guardada", "id": submission_id, "email_sent": False}
         
         return {"status": "success", "message": "Solicitud guardada correctamente", "id": submission_id}
-    except mysql.connector.Error as err:
-        logger.error(f"Error saving contact submission: {err}")
-        conn.rollback()
-        raise HTTPException(status_code=500, detail=str(err))
-    finally:
-        conn.close()
+    except Exception as e:
+        logger.error(f"Error saving contact submission: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.post("/newsletter-subscribe")
 async def subscribe_newsletter(input: NewsletterSubscriptionCreate):
-    conn = get_db_connection()
-    if not conn:
+    if not db:
         raise HTTPException(status_code=500, detail="Database connection error")
     
     try:
-        cursor = conn.cursor(dictionary=True)
         # Check if email already exists
-        cursor.execute("SELECT id FROM newsletter_subscriptions WHERE email = %s", (input.email,))
-        existing = cursor.fetchone()
+        existing = db.newsletter_subscriptions.find_one({"email": input.email})
         
         if existing:
-            cursor.close()
             return {"status": "info", "message": "Este email ya está suscrito"}
         
         # Insert new subscription
-        query = "INSERT INTO newsletter_subscriptions (name, email, phone, subscribed_at) VALUES (%s, %s, %s, %s)"
-        cursor.execute(query, (input.name, input.email, input.phone, datetime.now(timezone.utc)))
-        conn.commit()
-        subscription_id = cursor.lastrowid
-        cursor.close()
+        subscription_data = {
+            "name": input.name,
+            "email": input.email,
+            "phone": input.phone,
+            "subscribed_at": datetime.now(timezone.utc)
+        }
+        result = db.newsletter_subscriptions.insert_one(subscription_data)
+        subscription_id = str(result.inserted_id)
         
         logger.info(f"New newsletter subscription: {input.email}")
         return {
@@ -306,74 +279,51 @@ async def subscribe_newsletter(input: NewsletterSubscriptionCreate):
             "message": "¡Gracias por suscribirte! Recibirás las últimas novedades.",
             "id": subscription_id
         }
-    except mysql.connector.Error as err:
-        logger.error(f"Error subscribing to newsletter: {err}")
-        conn.rollback()
-        raise HTTPException(status_code=500, detail=str(err))
-    finally:
-        conn.close()
+    except Exception as e:
+        logger.error(f"Error subscribing to newsletter: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 # Admin routes
 @api_router.get("/admin/newsletter-subscriptions", response_model=List[NewsletterSubscription])
 async def get_newsletter_subscriptions(username: str = Depends(verify_admin)):
-    conn = get_db_connection()
-    if not conn:
+    if not db:
         raise HTTPException(status_code=500, detail="Database connection error")
     
     try:
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM newsletter_subscriptions ORDER BY subscribed_at DESC")
-        subscriptions = cursor.fetchall()
-        cursor.close()
-        return subscriptions
-    except mysql.connector.Error as err:
-        logger.error(f"Error fetching subscriptions: {err}")
-        raise HTTPException(status_code=500, detail=str(err))
-    finally:
-        conn.close()
+        subscriptions = list(db.newsletter_subscriptions.find().sort("subscribed_at", -1))
+        return [serialize_doc(s) for s in subscriptions]
+    except Exception as e:
+        logger.error(f"Error fetching subscriptions: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.get("/admin/contact-submissions", response_model=List[ContactSubmission])
 async def get_contact_submissions(username: str = Depends(verify_admin)):
-    conn = get_db_connection()
-    if not conn:
+    if not db:
         raise HTTPException(status_code=500, detail="Database connection error")
     
     try:
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM contact_submissions ORDER BY submitted_at DESC")
-        submissions = cursor.fetchall()
-        cursor.close()
-        return submissions
-    except mysql.connector.Error as err:
-        logger.error(f"Error fetching contact submissions: {err}")
-        raise HTTPException(status_code=500, detail=str(err))
-    finally:
-        conn.close()
+        submissions = list(db.contact_submissions.find().sort("submitted_at", -1))
+        return [serialize_doc(s) for s in submissions]
+    except Exception as e:
+        logger.error(f"Error fetching contact submissions: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.delete("/admin/contact-submissions/{submission_id}")
-async def delete_contact_submission(submission_id: int, username: str = Depends(verify_admin)):
-    conn = get_db_connection()
-    if not conn:
+async def delete_contact_submission(submission_id: str, username: str = Depends(verify_admin)):
+    if not db:
         raise HTTPException(status_code=500, detail="Database connection error")
     
     try:
-        cursor = conn.cursor()
-        cursor.execute("DELETE FROM contact_submissions WHERE id = %s", (submission_id,))
-        conn.commit()
-        affected_rows = cursor.rowcount
-        cursor.close()
+        result = db.contact_submissions.delete_one({"_id": ObjectId(submission_id)})
         
-        if affected_rows == 0:
+        if result.deleted_count == 0:
             raise HTTPException(status_code=404, detail="Solicitud no encontrada")
         
         logger.info(f"Deleted contact submission {submission_id}")
         return {"status": "success", "message": "Solicitud eliminada correctamente"}
-    except mysql.connector.Error as err:
-        logger.error(f"Error deleting submission: {err}")
-        conn.rollback()
-        raise HTTPException(status_code=500, detail=str(err))
-    finally:
-        conn.close()
+    except Exception as e:
+        logger.error(f"Error deleting submission: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.post("/admin/verify")
 async def verify_admin_password(credentials: HTTPBasicCredentials = Depends(security)):
