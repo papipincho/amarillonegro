@@ -138,7 +138,7 @@ async def root():
 
 @api_router.get("/services", response_model=List[Service])
 async def get_all_services():
-    if not db:
+    if db is None:
         raise HTTPException(status_code=500, detail="Database connection error")
     
     try:
@@ -150,7 +150,7 @@ async def get_all_services():
 
 @api_router.get("/services/{category}", response_model=List[Service])
 async def get_services_by_category(category: str):
-    if not db:
+    if db is None:
         raise HTTPException(status_code=500, detail="Database connection error")
     
     try:
@@ -162,7 +162,7 @@ async def get_services_by_category(category: str):
 
 @api_router.post("/services", response_model=Service)
 async def create_service(input: ServiceCreate):
-    if not db:
+    if db is None:
         raise HTTPException(status_code=500, detail="Database connection error")
     
     try:
@@ -187,7 +187,7 @@ async def create_service(input: ServiceCreate):
 
 @api_router.post("/contact-submission")
 async def submit_contact_form(input: ContactSubmissionCreate):
-    if not db:
+    if db is None:
         raise HTTPException(status_code=500, detail="Database connection error")
     
     try:
@@ -253,7 +253,7 @@ async def submit_contact_form(input: ContactSubmissionCreate):
 
 @api_router.post("/newsletter-subscribe")
 async def subscribe_newsletter(input: NewsletterSubscriptionCreate):
-    if not db:
+    if db is None:
         raise HTTPException(status_code=500, detail="Database connection error")
     
     try:
@@ -286,7 +286,7 @@ async def subscribe_newsletter(input: NewsletterSubscriptionCreate):
 # Admin routes
 @api_router.get("/admin/newsletter-subscriptions", response_model=List[NewsletterSubscription])
 async def get_newsletter_subscriptions(username: str = Depends(verify_admin)):
-    if not db:
+    if db is None:
         raise HTTPException(status_code=500, detail="Database connection error")
     
     try:
@@ -298,7 +298,7 @@ async def get_newsletter_subscriptions(username: str = Depends(verify_admin)):
 
 @api_router.get("/admin/contact-submissions", response_model=List[ContactSubmission])
 async def get_contact_submissions(username: str = Depends(verify_admin)):
-    if not db:
+    if db is None:
         raise HTTPException(status_code=500, detail="Database connection error")
     
     try:
@@ -310,7 +310,7 @@ async def get_contact_submissions(username: str = Depends(verify_admin)):
 
 @api_router.delete("/admin/contact-submissions/{submission_id}")
 async def delete_contact_submission(submission_id: str, username: str = Depends(verify_admin)):
-    if not db:
+    if db is None:
         raise HTTPException(status_code=500, detail="Database connection error")
     
     try:
