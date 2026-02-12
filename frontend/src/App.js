@@ -7,6 +7,7 @@ import CategoryPage from "@/pages/CategoryPage";
 import PublishServicePage from "@/pages/PublishServicePage";
 import NewsPage from "@/pages/NewsPage";
 import NewsArticle from "@/pages/NewsArticle";
+import AdminDashboard from "@/pages/AdminDashboard";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
@@ -22,6 +23,7 @@ function App() {
           <Route path="/publicar-servicio" element={<PublishServicePage />} />
           <Route path="/noticias" element={<NewsPage />} />
           <Route path="/noticias/:slug" element={<NewsArticle />} />
+          <Route path="/admin" element={<AdminDashboard />} />
         </Routes>
         <Footer />
       </BrowserRouter>

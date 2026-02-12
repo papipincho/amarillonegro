@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { Mail } from "lucide-react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 const Footer = () => {
+  const navigate = useNavigate();
   const [newsletterData, setNewsletterData] = useState({ name: "", email: "" });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -91,7 +93,7 @@ const Footer = () => {
           {/* About */}
           <div>
             <h3 className="text-2xl font-bold text-[#FFCC00] mb-4 tracking-tight">
-              TAXI BARCELONA
+              AMARILLONEGRO.COM
             </h3>
             <p className="text-zinc-400 leading-relaxed">
               El portal de referencia para servicios profesionales del sector del taxi en Barcelona.
@@ -124,6 +126,15 @@ const Footer = () => {
                   Publicar Anuncio
                 </a>
               </li>
+              <li>
+                <button
+                  onClick={() => navigate("/admin")}
+                  className="text-zinc-400 hover:text-[#FFCC00] transition-colors"
+                  data-testid="admin-link"
+                >
+                  Admin
+                </button>
+              </li>
             </ul>
           </div>
 
@@ -142,7 +153,7 @@ const Footer = () => {
         </div>
 
         <div className="border-t border-zinc-800 mt-8 pt-8 text-center text-zinc-500 text-sm">
-          <p>© {new Date().getFullYear()} Portal Taxi Barcelona. Todos los derechos reservados.</p>
+          <p>© {new Date().getFullYear()} AmarilloNegro.com - Portal Taxi Barcelona. Todos los derechos reservados.</p>
         </div>
       </div>
     </footer>

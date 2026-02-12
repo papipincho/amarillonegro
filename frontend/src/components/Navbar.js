@@ -2,6 +2,30 @@ import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 
+const TaxiLogo = () => (
+  <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Taxi body */}
+    <rect x="15" y="45" width="70" height="30" fill="#FFCC00" stroke="#000" strokeWidth="3"/>
+    {/* Taxi roof */}
+    <path d="M 30 45 L 35 30 L 65 30 L 70 45" fill="#FFCC00" stroke="#000" strokeWidth="3"/>
+    {/* Taxi sign on roof */}
+    <rect x="40" y="20" width="20" height="8" fill="#000"/>
+    <text x="50" y="27" fontSize="6" fill="#FFCC00" textAnchor="middle" fontWeight="bold">TAXI</text>
+    {/* Windows */}
+    <rect x="38" y="33" width="10" height="10" fill="#87CEEB" stroke="#000" strokeWidth="1.5"/>
+    <rect x="52" y="33" width="10" height="10" fill="#87CEEB" stroke="#000" strokeWidth="1.5"/>
+    {/* Wheels */}
+    <circle cx="30" cy="75" r="8" fill="#000"/>
+    <circle cx="30" cy="75" r="4" fill="#555"/>
+    <circle cx="70" cy="75" r="8" fill="#000"/>
+    <circle cx="70" cy="75" r="4" fill="#555"/>
+    {/* Headlights */}
+    <circle cx="82" cy="55" r="3" fill="#FFF" stroke="#000" strokeWidth="1"/>
+    {/* Details */}
+    <line x1="20" y1="60" x2="80" y2="60" stroke="#000" strokeWidth="2"/>
+  </svg>
+);
+
 const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -19,12 +43,12 @@ const Navbar = () => {
             className="cursor-pointer flex items-center gap-3"
             data-testid="logo"
           >
-            <div className="bg-[#FFCC00] p-2 border-2 border-white">
-              <span className="text-2xl font-bold text-black">TB</span>
+            <div className="bg-[#FFCC00] p-1 border-2 border-white rounded-sm">
+              <TaxiLogo />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-white tracking-tight">TAXI BCN</h1>
-              <p className="text-xs text-zinc-400">Portal de Servicios</p>
+              <h1 className="text-xl font-bold text-white tracking-tight">AMARILLONEGRO</h1>
+              <p className="text-xs text-zinc-400">Portal Taxi Barcelona</p>
             </div>
           </div>
 
