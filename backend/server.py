@@ -292,8 +292,8 @@ async def subscribe_newsletter(input: NewsletterSubscriptionCreate):
             return {"status": "info", "message": "Este email ya está suscrito"}
         
         # Insert new subscription
-        query = "INSERT INTO newsletter_subscriptions (name, email, subscribed_at) VALUES (%s, %s, %s)"
-        cursor.execute(query, (input.name, input.email, datetime.now(timezone.utc)))
+        query = "INSERT INTO newsletter_subscriptions (name, email, phone, subscribed_at) VALUES (%s, %s, %s, %s)"
+        cursor.execute(query, (input.name, input.email, input.phone, datetime.now(timezone.utc)))
         conn.commit()
         subscription_id = cursor.lastrowid
         cursor.close()
