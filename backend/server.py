@@ -311,6 +311,7 @@ async def subscribe_newsletter(input: NewsletterSubscriptionCreate):
     finally:
         conn.close()
 
+# Admin routes
 @api_router.get("/admin/newsletter-subscriptions", response_model=List[NewsletterSubscription])
 async def get_newsletter_subscriptions(username: str = Depends(verify_admin)):
     conn = get_db_connection()
@@ -325,6 +326,49 @@ async def get_newsletter_subscriptions(username: str = Depends(verify_admin)):
         return subscriptions
     except mysql.connector.Error as err:
         logger.error(f"Error fetching subscriptions: {err}")
+        raise HTTPException(status_code=500, detail=str(err))
+    finally:
+        conn.close()
+
+@api_router.get("/admin/contact-submissions", response_model=List[ContactSubmission])
+async def get_contact_submissions(username: str = Depends(verify_admin)):
+    conn = get_db_connection()
+    if not conn:
+        raise HTTPException(status_code=500, detail="Database connection error")
+    
+    try:
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM contact_submissions ORDER BY submitted_at DESC")
+        submissions = cursor.fetchall()
+        cursor.close()
+        return submissions
+    except mysql.connector.Error as err:
+        logger.error(f"Error fetching contact submissions: {err}")
+        raise HTTPException(status_code=500, detail=str(err))
+    finally:
+        conn.close()
+
+@api_router.delete("/admin/contact-submissions/{submission_id}")
+async def delete_contact_submission(submission_id: int, username: str = Depends(verify_admin)):
+    conn = get_db_connection()
+    if not conn:
+        raise HTTPException(status_code=500, detail="Database connection error")
+    
+    try:
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM contact_submissions WHERE id = %s", (submission_id,))
+        conn.commit()
+        affected_rows = cursor.rowcount
+        cursor.close()
+        
+        if affected_rows == 0:
+            raise HTTPException(status_code=404, detail="Solicitud no encontrada")
+        
+        logger.info(f"Deleted contact submission {submission_id}")
+        return {"status": "success", "message": "Solicitud eliminada correctamente"}
+    except mysql.connector.Error as err:
+        logger.error(f"Error deleting submission: {err}")
+        conn.rollback()
         raise HTTPException(status_code=500, detail=str(err))
     finally:
         conn.close()
