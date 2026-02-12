@@ -128,7 +128,7 @@ class NewsletterSubscription(BaseModel):
 class NewsletterSubscriptionCreate(BaseModel):
     name: str
     email: EmailStr
-    phone: str
+    phone: Optional[str] = None
 
 
 # Routes
