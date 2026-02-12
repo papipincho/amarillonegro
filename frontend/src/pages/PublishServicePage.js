@@ -23,6 +23,12 @@ const PublishServicePage = () => {
   React.useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  React.useEffect(() => {
+    if (success) {
+      window.scrollTo(0, 0);
+    }
+  }, [success]);
   
   const [formData, setFormData] = useState({
     name: "",
@@ -53,7 +59,6 @@ const PublishServicePage = () => {
       const response = await axios.post(`${API}/contact-submission`, formData);
       console.log("Submission successful:", response.data);
       setSuccess(true);
-      window.scrollTo(0, 0);
       setFormData({
         name: "",
         email: "",
