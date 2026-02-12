@@ -20,16 +20,6 @@ const CATEGORIES = [
 const PublishServicePage = () => {
   const navigate = useNavigate();
   
-  React.useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
-
-  React.useEffect(() => {
-    if (success) {
-      window.scrollTo(0, 0);
-    }
-  }, [success]);
-  
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -42,6 +32,16 @@ const PublishServicePage = () => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
+
+  React.useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  React.useEffect(() => {
+    if (success) {
+      window.scrollTo(0, 0);
+    }
+  }, [success]);
 
   const handleChange = (e) => {
     setFormData({
