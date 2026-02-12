@@ -99,49 +99,43 @@ Execute `/app/backend/schema.sql` in your MySQL hosting to create tables:
 - 48 HTML company profiles in `/app/frontend/public/fichas/`
 - Static news pages
 
-## Database Schema (MongoDB)
+## Database Schema (MySQL)
 
 ### newsletter_subscriptions
-```json
-{
-  "_id": ObjectId,
-  "name": String,
-  "email": String (unique),
-  "phone": String,
-  "subscribed_at": DateTime
-}
+```sql
+id INT AUTO_INCREMENT PRIMARY KEY
+name VARCHAR(255) NOT NULL
+email VARCHAR(255) NOT NULL UNIQUE
+phone VARCHAR(50)
+subscribed_at DATETIME
 ```
 
 ### contact_submissions
-```json
-{
-  "_id": ObjectId,
-  "name": String,
-  "email": String,
-  "phone": String,
-  "service_category": String,
-  "business_name": String,
-  "description": String,
-  "website": String (optional),
-  "submitted_at": DateTime
-}
+```sql
+id INT AUTO_INCREMENT PRIMARY KEY
+name VARCHAR(255) NOT NULL
+email VARCHAR(255) NOT NULL
+phone VARCHAR(50) NOT NULL
+service_category VARCHAR(100) NOT NULL
+business_name VARCHAR(255) NOT NULL
+description TEXT NOT NULL
+website VARCHAR(500)
+submitted_at DATETIME
 ```
 
 ### services
-```json
-{
-  "_id": ObjectId,
-  "category": String,
-  "name": String,
-  "description": String,
-  "contact_name": String,
-  "email": String,
-  "phone": String,
-  "website": String,
-  "address": String,
-  "image_url": String,
-  "created_at": DateTime
-}
+```sql
+id INT AUTO_INCREMENT PRIMARY KEY
+category VARCHAR(100) NOT NULL
+name VARCHAR(255) NOT NULL
+description TEXT NOT NULL
+contact_name VARCHAR(255)
+email VARCHAR(255)
+phone VARCHAR(50)
+website VARCHAR(500)
+address VARCHAR(500)
+image_url VARCHAR(500)
+created_at DATETIME
 ```
 
 ## Key Files
