@@ -54,7 +54,7 @@ Create a service portal for taxi drivers in Barcelona named "amarillonegro.com" 
 ## What's Been Implemented ✅
 
 ### Backend
-- `/api/newsletter-subscribe` - Saves name, email, phone to DB
+- `/api/newsletter-subscribe` - Saves name, email, phone (optional) to DB
 - `/api/contact-submission` - Saves service submissions + sends email
 - `/api/services` - CRUD for services
 - `/api/admin/newsletter-subscriptions` - List subscribers (protected)
@@ -65,14 +65,18 @@ Create a service portal for taxi drivers in Barcelona named "amarillonegro.com" 
 - Homepage with category cards
 - Category pages linking to 48 static company profiles
 - News section with static articles
-- Service submission form (Publicar Servicio)
-- Newsletter signup in footer with phone field
+- Service submission form (Publicar Servicio) with scroll-to-top on success
+- Newsletter signup in footer with:
+  - Phone field is OPTIONAL
+  - Message about WhatsApp channel if phone provided
 - Admin dashboard with:
   - Login screen
   - Stats cards (services count, subscribers count)
   - Tabs for Services and Newsletter
   - Teléfono column in subscribers table
   - Delete functionality for services
+- Logo reduced to h-10 size
+- Yellow color #FFCC00 throughout
 
 ### Static Content
 - 48 HTML company profiles in `/app/frontend/public/fichas/`
